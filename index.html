@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Daftar Promo Bulanan — Fabriku</title>
+  <style>
+    :root{--bg:#f6f8fa;--card:#ffffff;--muted:#6b7280;--accent:#0ea5a4}
+    body{font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; background:var(--bg); margin:0; color:#111}
+    .container{max-width:1100px;margin:28px auto;padding:20px}
+    header{display:flex;gap:16px;align-items:center;justify-content:space-between}
+    h1{margin:0;font-size:20px}
+    .controls{display:flex;gap:12px;align-items:center}
+    select,input[type=search]{padding:8px 10px;border-radius:8px;border:1px solid #e6e9ee;background:#fff}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:20px}
+    .card{background:var(--card);border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(16,24,40,0.06);border:1px solid rgba(15,23,42,0.03)}
+    .card h3{margin:0 0 6px;font-size:16px}
+    .meta{font-size:13px;color:var(--muted);margin-bottom:8px}
+    .desc{font-size:14px;color:#111;margin-bottom:10px}
+    .tag{display:inline-block;padding:6px 8px;border-radius:999px;font-size:12px;background:rgba(14,165,164,0.08);color:var(--accent);border:1px solid rgba(14,165,164,0.12)}
+    footer{margin-top:20px;font-size:13px;color:var(--muted)}
+    .actions{display:flex;gap:8px}
+    button{padding:8px 10px;border-radius:8px;border:0;background:var(--accent);color:#fff;cursor:pointer}
+    button.secondary{background:#fff;border:1px solid #e6e9ee;color:#111}
+    .empty{padding:40px;text-align:center;color:var(--muted);background:linear-gradient(180deg,#fff,#fbfdfe);border-radius:12px;border:1px dashed #e6e9ee}
+    pre{background:#0b1220;color:#d1f2f0;padding:12px;border-radius:8px;overflow:auto}
+    .help{font-size:13px;color:var(--muted)}
+    @media (max-width:600px){header{flex-direction:column;align-items:stretch;gap:8px}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div>
+        <h1>Daftar Promo Bulanan Fabriku</h1>
+        <div class="help"></div>
+      </div>
+
+      <div class="controls">
+        <label for="monthSel" class="sr-only">Pilih Bulan</label>
+        <select id="monthSel"></select>
+        <input id="search" type="search" placeholder="Cari (nama, kode, keterangan)" />
+        <div class="actions">
+          <button id="printBtn">Cetak</button>
+          <button id="exportBtn" class="secondary">Export CSV</button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <div id="grid" class="grid"></div>
+      <div id="empty" class="empty" style="display:none">Tidak ada promo untuk periode yang dipilih.</div>
+    </main>
+
+    <footer>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div class="help">.</div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    /* =========================
+       DATA PROMO (sesuaikan tiap bulan)
+       - Untuk menambah periode baru, gunakan key format "YYYY-MM" (contoh "2025-12").
+       - Setiap promo: {id, title, start (YYYY-MM-DD), end (YYYY-MM-DD), tag, description, image}
+       - Kamu bisa juga menyimpan data ini sebagai file JSON terpisah di repo, lalu ganti fetchData() untuk load dari URL.
+       ========================= */
+
+    const PROMOS = {
+  "2025-12": [
+    {
+      id:'P-01',
+      title:'Promo ROL',
+      start:'2025-12-01',
+      end:'2025-12-31',
+      tag:'ROL',
+      description: `Diskon Semua Item Kecuali MTIIS
+2–5 Rol → Rp. 1000/kg
+6–10 Rol → Rp. 2000/kg
+11–20 Rol → Rp. 2500/kg
+21–30 Rol → Rp. 3000/kg
+31–40 Rol → Rp. 3500/kg
+40 Rol → Rp. 4000/kg
+Berlaku hanya untuk kain body dan pembelian offline.`,
+      image:''
+    },
+
+    {
+      id:'P-02',
+      title:'Promo Website',
+      start:'2025-12-01',
+      end:'2025-12-31',
+      tag:'website',
+      description:`Diskon 3% untuk pembelian semua kain di website Fabriku dengan kode kupon VERSACOTTON.
+Tidak berlaku untuk MTIIS.`,
+      image:''
+    },
+
+    {
+      id:'P-03',
+      title:'Bracket SPV',
+      start:'2025-12-01',
+      end:'2025-12-31',
+      tag:'SPV',
+      description:`21 - 30 rol = Rp. 4.000
+31 - 40 rol = Rp. 4.500
+40 rol = Rp. 5.000`,
+      image:''
+    },
+
+    {
+      id:'P-04',
+      title:'Promo Item Baru',
+      start:'2025-12-01',
+      end:'2025-12-31',
+      tag:'new',
+      description:`Versa Cotton Terra — Minimal 5 kg, Diskon 5000/kg.
+Cotton Elastech — Minimal 5 kg, Diskon 3000/kg.`,
+      image:''
+    },
+
+    {
+      id:'P-05',
+      title:'Promo CVC 24s Lacoste Hitam Setting 42',
+      start:'2025-08-01',
+      end:'2026-01-01',
+      tag:'hitam',
+      description:`Product : CVC 24s Lacoste
+Warna : Hitam (Kategori TK)
+Setting : 42
+Diskon Rp. 2.000/kg
+
+Ketentuan:
+• Penjualan body & accessories tanpa minimal qty
+• Berlaku sampai stock habis
+• Penjualan tunai
+• Bisa digabung promo lain`,
+      image:''
+    },
+
+    {
+      id:'P-06',
+      title:'Promo Dibawah 1 KG',
+      start:'2025-01-01',
+      end:'2026-01-01',
+      tag:'ecer',
+      description:`Harga spesial:
+- COTTON 65.000
+- CVC 45.000
+- M-TIIS 55.000
+
+Aturan:
+1. Qty max 1 kg
+2. Ujung kain tidak dipotong
+3. Tidak ada minimal pembelian`,
+      image:''
+    }
+  ]
+};
+
+
+    /* ================ App logic ================ */
+    const monthSel = document.getElementById('monthSel');
+    const grid = document.getElementById('grid');
+    const empty = document.getElementById('empty');
+    const search = document.getElementById('search');
+
+    function listMonths(){
+      const keys = Object.keys(PROMOS).sort().reverse();
+      keys.forEach(k=>{
+        const opt = document.createElement('option'); opt.value=k; opt.textContent=displayMonth(k);
+        monthSel.appendChild(opt);
+      });
+      // set default to current month if exist, otherwise latest available
+      const nowKey = new Date().toISOString().slice(0,7);
+      monthSel.value = keys.includes(nowKey)? nowKey : (keys[0] || '');
+    }
+
+    function displayMonth(k){
+      const [y,m] = k.split('-');
+      const d = new Date(Number(y), Number(m)-1, 1);
+      return d.toLocaleString('id-ID', {month:'long', year:'numeric'});
+    }
+
+    function render(){
+      grid.innerHTML='';
+      const key = monthSel.value;
+      const term = search.value.trim().toLowerCase();
+      const items = (PROMOS[key] || []).filter(i=>{
+        if(!term) return true;
+        return (i.title+i.id+(i.tag||'')+i.description).toLowerCase().includes(term);
+      });
+      if(items.length===0){ empty.style.display='block'; grid.style.display='none'; return; }
+      empty.style.display='none'; grid.style.display='grid';
+      items.forEach(it=>{
+        const c = document.createElement('div'); c.className='card';
+        c.innerHTML = `
+          <h3>${it.title}</h3>
+          <div class="meta">${it.id} • ${formatRange(it.start,it.end)} • <span class="tag">${it.tag||'Promo'}</span></div>
+          <div class="desc">${it.description}</div>
+        `;
+        grid.appendChild(c);
+      });
+    }
+
+    function formatRange(s,e){
+      const start = new Date(s); const end = new Date(e);
+      const opts = {day:'numeric', month:'short'};
+      return `${start.toLocaleDateString('id-ID',opts)} — ${end.toLocaleDateString('id-ID',opts)}`;
+    }
+
+    // Export current list to CSV
+    function exportCSV(){
+      const key = monthSel.value; const rows = PROMOS[key] || [];
+      if(rows.length===0){ alert('Tidak ada data untuk diexport.'); return; }
+      const header = ['id','title','start','end','tag','description'];
+      const csv = [header.join(',')].concat(rows.map(r=>header.map(h=>escapeCSV(r[h]||'')).join(','))).join('\n');
+      const blob = new Blob([csv],{type:'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download=`promos-${key}.csv`; a.click(); URL.revokeObjectURL(url);
+    }
+    function escapeCSV(v){ if(typeof v!=='string') v=String(v); return '"'+v.replace(/"/g,'""')+'"'; }
+
+    document.getElementById('exportBtn').addEventListener('click', exportCSV);
+    document.getElementById('printBtn').addEventListener('click', ()=>window.print());
+    monthSel.addEventListener('change', render);
+    search.addEventListener('input', render);
+
+    // initialize
+    listMonths(); render();
+
+    /* If you prefer to load promos from a JSON file in the repo instead of editing this file:
+       1) create promos.json in the same repo and push it,
+       2) replace PROMOS static object with a fetch to '/your-path/promos.json' and call render() after fetch completes.
+       (GitHub Pages serves files from the repo root or docs/ depending on your setup.)
+    */
+  </script>
+</body>
+</html>
