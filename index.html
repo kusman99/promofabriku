@@ -74,7 +74,6 @@
     .desc{
       white-space:pre-line;
       font-size:14px;
-      color:#111;
       line-height:1.45;
     }
     .tag{
@@ -98,7 +97,6 @@
       color:#fff;
       cursor:pointer;
       font-size:14px;
-      font-weight:500;
     }
     button.secondary{
       background:#fff;
@@ -114,7 +112,6 @@
       border:1px dashed #e6e9ee;
       margin-top:20px;
     }
-
     @media(max-width:600px){
       header{flex-direction:column;align-items:flex-start;}
     }
@@ -122,204 +119,187 @@
 </head>
 
 <body>
-  <div class="container">
+<div class="container">
 
-    <header>
-      <h1>Daftar Promo Bulanan Fabriku</h1>
+  <header>
+    <h1>Daftar Promo Bulanan Fabriku</h1>
 
-      <div class="controls">
-        <select id="monthSel">
-          <option value="2025-12">Desember 2025</option>
-        </select>
+    <div class="controls">
+      <select id="monthSel">
+        <option value="2025-12">Desember 2025</option>
+        <option value="2026-01">Januari 2026</option>
+      </select>
 
-        <input id="search" type="search" placeholder="Cari (nama, kode, ket.)" />
+      <input id="search" type="search" placeholder="Cari (nama, kode, ket.)" />
 
-        <div class="actions">
-          <button id="printBtn">Cetak</button>
-          <button id="exportBtn" class="secondary">Export CSV</button>
-        </div>
+      <div class="actions">
+        <button id="printBtn">Cetak</button>
+        <button id="exportBtn" class="secondary">Export CSV</button>
       </div>
-    </header>
+    </div>
+  </header>
 
-    <main>
-      <div id="grid" class="grid"></div>
-      <div id="empty" class="empty" style="display:none">Tidak ada promo untuk periode ini.</div>
-    </main>
+  <main>
+    <div id="grid" class="grid"></div>
+    <div id="empty" class="empty" style="display:none">
+      Tidak ada promo untuk periode ini.
+    </div>
+  </main>
 
-  </div>
+</div>
 
-  <script>
-    /* ====================
-       DATA PROMO (Des 2025)
-       ==================== */
+<script>
+/* ====================
+   DATA PROMO
+   ==================== */
 
-    const PROMOS = {
-      "2025-12": [
-        {
-          id:'P-01',
-          title:'Promo ROL',
-          start:'2025-12-01',
-          end:'2025-12-31',
-          tag:'ROL',
-          description:`Diskon Semua Item Kecuali MTIIS
+const PROMOS = {
+  "2025-12": [
+    {
+      id:'P-01',
+      title:'Promo ROL',
+      start:'2025-12-01',
+      end:'2025-12-31',
+      tag:'ROL',
+      description:`Diskon Semua Item Kecuali MTIIS
 2–5 Rol → Rp. 1000/kg
 6–10 Rol → Rp. 2000/kg
 11–20 Rol → Rp. 2500/kg
 21–30 Rol → Rp. 3000/kg
 31–40 Rol → Rp. 3500/kg
-40 Rol → Rp. 4000/kg
-Berlaku hanya untuk kain body dan pembelian offline.`
-        },
+≥ 40 Rol → Rp. 4000/kg
+Berlaku untuk kain body & offline.`
+    },
+    {
+      id:'P-02',
+      title:'Promo Website',
+      start:'2025-12-01',
+      end:'2025-12-31',
+      tag:'website',
+      description:`Diskon 3% semua kain di website
+Kode: VERSACOTTON
+Tidak berlaku MTIIS.`
+    },
+    {
+      id:'P-03',
+      title:'Bracket SPV',
+      start:'2025-12-01',
+      end:'2025-12-31',
+      tag:'SPV',
+      description:`21–30 rol = Rp. 4.000
+31–40 rol = Rp. 4.500
+≥ 40 rol = Rp. 5.000`
+    },
+    {
+      id:'P-04',
+      title:'Promo Item Baru',
+      start:'2025-12-01',
+      end:'2025-12-31',
+      tag:'new',
+      description:`Versa Cotton Terra — Min 5 kg, diskon 5000/kg
+Cotton Elastech — Min 5 kg, diskon 3000/kg`
+    },
+    {
+      id:'P-05',
+      title:'CVC 24s Lacoste Hitam Setting 42',
+      start:'2025-08-01',
+      end:'2026-01-31',
+      tag:'hitam',
+      description:`Diskon 2000/kg
+Tanpa minimal
+Tunai
+Berlaku sampai stok habis`
+    },
+    {
+      id:'P-06',
+      title:'Promo Dibawah 1 KG',
+      start:'2025-01-01',
+      end:'2026-01-31',
+      tag:'ecer',
+      description:`Harga:
+COTTON 65.000
+CVC 45.000
+M-TIIS 55.000
 
-        {
-          id:'P-02',
-          title:'Promo Website',
-          start:'2025-12-01',
-          end:'2025-12-31',
-          tag:'website',
-          description:`Diskon 3% untuk pembelian semua kain di website Fabriku dengan kode kupon VERSACOTTON.
-Tidak berlaku untuk MTIIS.`
-        },
-
-        {
-          id:'P-03',
-          title:'Bracket SPV',
-          start:'2025-12-01',
-          end:'2025-12-31',
-          tag:'SPV',
-          description:`21 - 30 rol = Rp. 4.000
-31 - 40 rol = Rp. 4.500
-40 rol = Rp. 5.000`
-        },
-
-        {
-          id:'P-04',
-          title:'Promo Item Baru',
-          start:'2025-12-01',
-          end:'2025-12-31',
-          tag:'new',
-          description:`Versa Cotton Terra — Minimal 5 kg, Diskon 5000/kg.
-Cotton Elastech — Minimal 5 kg, Diskon 3000/kg.`
-        },
-
-        {
-          id:'P-05',
-          title:'Promo CVC 24s Lacoste Hitam Setting 42',
-          start:'2025-08-01',
-          end:'2026-01-01',
-          tag:'hitam',
-          description:`Product : CVC 24s Lacoste
-Warna : Hitam (Kategori TK)
-Setting : 42
-Diskon 2000/kg
-
-Ketentuan:
-• Tanpa minimal qty
-• Penjualan body & aksesoris
-• Berlaku sampai stock habis
-• Penjualan tunai
-• Bisa digabung promo lain`
-        },
-
-        {
-          id:'P-06',
-          title:'Promo Dibawah 1 KG',
-          start:'2025-01-01',
-          end:'2026-01-01',
-          tag:'ecer',
-          description:`Harga spesial:
-• COTTON 65.000
-• CVC 45.000
-• M-TIIS 55.000
-
-Aturan:
-1. Qty max 1 kg
-2. Ujung kain tidak dipotong
-3. Tidak ada minimal pembelian`
-        }
-      ]
-    };
-
-    const grid = document.getElementById("grid");
-    const empty = document.getElementById("empty");
-    const search = document.getElementById("search");
-    const monthSel = document.getElementById("monthSel");
-
-    function formatRange(s,e){
-      const start = new Date(s);
-      const end = new Date(e);
-      const opt = {day:'numeric', month:'short'};
-      return `${start.toLocaleDateString('id-ID',opt)} — ${end.toLocaleDateString('id-ID',opt)}`;
+Max 1 kg
+Ujung tidak dipotong`
     }
+  ],
 
-    function render(){
-      grid.innerHTML = "";
+  "2026-01": []
+};
 
-      const key = monthSel.value;
-      const term = search.value.trim().toLowerCase();
+// copy promo Desember ke Januari
+PROMOS["2026-01"] = PROMOS["2025-12"].map(p => ({
+  ...p,
+  start:'2026-01-01',
+  end:'2026-01-31'
+}));
 
-      let items = PROMOS[key] || [];
+const grid = document.getElementById("grid");
+const empty = document.getElementById("empty");
+const search = document.getElementById("search");
+const monthSel = document.getElementById("monthSel");
 
-      if(term){
-        items = items.filter(i =>
-          (i.title + i.id + i.tag + i.description).toLowerCase().includes(term)
-        );
-      }
+function formatRange(s,e){
+  const opt = {day:'numeric', month:'short'};
+  return `${new Date(s).toLocaleDateString('id-ID',opt)} — ${new Date(e).toLocaleDateString('id-ID',opt)}`;
+}
 
-      if(items.length === 0){
-        empty.style.display = "block";
-        grid.style.display = "none";
-        return;
-      }
+function render(){
+  grid.innerHTML = "";
+  let items = PROMOS[monthSel.value] || [];
+  const term = search.value.toLowerCase();
 
-      empty.style.display = "none";
-      grid.style.display = "grid";
+  if(term){
+    items = items.filter(i =>
+      (i.title+i.id+i.tag+i.description).toLowerCase().includes(term)
+    );
+  }
 
-      items.forEach(it=>{
-        const card = document.createElement("div");
-        card.className = "card";
-        card.innerHTML = `
-          <h3>${it.title}</h3>
-          <div class="meta">${it.id} • ${formatRange(it.start,it.end)} • <span class="tag">${it.tag}</span></div>
-          <div class="desc">${it.description}</div>
-        `;
-        grid.appendChild(card);
-      });
-    }
+  if(!items.length){
+    empty.style.display="block";
+    grid.style.display="none";
+    return;
+  }
 
-    function exportCSV(){
-      const key = monthSel.value;
-      const rows = PROMOS[key] || [];
-      if(rows.length === 0){
-        alert("Tidak ada data promo.");
-        return;
-      }
+  empty.style.display="none";
+  grid.style.display="grid";
 
-      const header = ['id','title','start','end','tag','description'];
-      const csv = [
-        header.join(',')
-      ].concat(
-        rows.map(r => header.map(h => `"${String(r[h]||'').replace(/"/g,'""')}"`).join(','))
-      ).join('\n');
+  items.forEach(i=>{
+    grid.innerHTML += `
+      <div class="card">
+        <h3>${i.title}</h3>
+        <div class="meta">${i.id} • ${formatRange(i.start,i.end)} • <span class="tag">${i.tag}</span></div>
+        <div class="desc">${i.description}</div>
+      </div>
+    `;
+  });
+}
 
-      const blob = new Blob([csv],{type:'text/csv'});
-      const url = URL.createObjectURL(blob);
+function exportCSV(){
+  const rows = PROMOS[monthSel.value] || [];
+  if(!rows.length) return alert("Tidak ada data promo");
 
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `promo-${key}.csv`;
-      a.click();
+  const header=['id','title','start','end','tag','description'];
+  const csv=[header.join(',')]
+    .concat(rows.map(r=>header.map(h=>`"${(r[h]||'').replace(/"/g,'""')}"`).join(',')))
+    .join('\n');
 
-      URL.revokeObjectURL(url);
-    }
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`promo-${monthSel.value}.csv`;
+  a.click();
+}
 
-    search.addEventListener("input", render);
-    monthSel.addEventListener("change", render);
-    document.getElementById("printBtn").addEventListener("click", ()=>window.print());
-    document.getElementById("exportBtn").addEventListener("click", exportCSV);
+search.addEventListener("input",render);
+monthSel.addEventListener("change",render);
+document.getElementById("printBtn").onclick=()=>window.print();
+document.getElementById("exportBtn").onclick=exportCSV;
 
-    render();
-  </script>
+render();
+</script>
 
 </body>
 </html>
