@@ -125,13 +125,8 @@
     <h1>Daftar Promo Bulanan Fabriku</h1>
 
     <div class="controls">
-      <select id="monthSel">
-        <option value="2025-12">Desember 2025</option>
-        <option value="2026-01">Januari 2026</option>
-      </select>
-
+      <select id="monthSel"></select>
       <input id="search" type="search" placeholder="Cari (nama, kode, ket.)" />
-
       <div class="actions">
         <button id="printBtn">Cetak</button>
         <button id="exportBtn" class="secondary">Export CSV</button>
@@ -224,22 +219,118 @@ M-TIIS 55.000
 Max 1 kg
 Ujung tidak dipotong`
     }
-  ],
-
-  "2026-01": []
+  ]
 };
 
-// copy promo Desember ke Januari
+// copy promo Desember → Januari
 PROMOS["2026-01"] = PROMOS["2025-12"].map(p => ({
   ...p,
   start:'2026-01-01',
   end:'2026-01-31'
 }));
 
+// Februari 2026
+PROMOS["2026-02"] = [
+  {
+    id:'P-07',
+    title:'Promo Rol untuk Selected Customer',
+    start:'2026-02-01',
+    end:'2026-02-28',
+    tag:'FEB',
+    description:`Diskon Semua Item Kecuali MTIIS
+
+5–10 Rol → Rp. 2000/kg
+11–30 Rol → Rp. 3000/kg
+> 30 Rol → Rp. 4000/kg
+
+- Berlaku untuk kain body & offline
+- Penjualan tunai
+- Berlaku jika ada permintaan dari customer dan ACC SPV`
+  },
+{
+      id:'P-08',
+      title:'Promo Website',
+      start:'2026-02-01',
+    end:'2026-02-28',
+      tag:'website',
+      description:`Diskon 3% semua kain di website
+Kode: VERSACOTTON
+Tidak berlaku MTIIS.`
+    },
+    {
+      id:'P-09',
+      title:'Bracket SPV',
+      start:'2026-02-01',
+    end:'2026-02-28',
+      tag:'SPV',
+      description:`21–30 rol = Rp. 4.000
+31–40 rol = Rp. 4.500
+≥ 40 rol = Rp. 5.000
+
+- Berlaku setelah SPV ACC`
+    },
+        {
+      id:'P-10',
+      title:'CVC 24s Lacoste Hitam Setting 42',
+      start:'2026-02-01',
+    end:'2026-02-28',
+      tag:'hitam',
+      description:`Diskon 2000/kg
+
+- Tanpa minimal
+- Berlaku untuk badan dan aksesoris
+- Tunai
+- Berlaku sampai stok habis`
+    },
+    {
+      id:'P-11',
+      title:'Promo Dibawah 1 KG',
+      start:'2026-02-01',
+    end:'2026-02-28',
+      tag:'ecer',
+      description:`Harga:
+COTTON 65.000
+CVC 45.000
+M-TIIS 55.000
+
+Max 1 kg
+Ujung tidak dipotong`
+    }
+];
+
+/* ====================
+   DROPDOWN BULAN
+   ==================== */
+
+const monthNames = {
+  '01':'Januari','02':'Februari','03':'Maret','04':'April',
+  '05':'Mei','06':'Juni','07':'Juli','08':'Agustus',
+  '09':'September','10':'Oktober','11':'November','12':'Desember'
+};
+
 const grid = document.getElementById("grid");
 const empty = document.getElementById("empty");
 const search = document.getElementById("search");
 const monthSel = document.getElementById("monthSel");
+
+function buildMonthDropdown(){
+  const months = Object.keys(PROMOS).sort((a,b)=>b.localeCompare(a));
+  monthSel.innerHTML = "";
+
+  months.forEach(m=>{
+    const [y,mo] = m.split("-");
+    const opt = document.createElement("option");
+    opt.value = m;
+    opt.textContent = `${monthNames[mo]} ${y}`;
+    monthSel.appendChild(opt);
+  });
+
+  monthSel.selectedIndex = 0;
+}
+
+/* ====================
+   RENDER
+   ==================== */
 
 function formatRange(s,e){
   const opt = {day:'numeric', month:'short'};
@@ -277,6 +368,10 @@ function render(){
   });
 }
 
+/* ====================
+   ACTIONS
+   ==================== */
+
 function exportCSV(){
   const rows = PROMOS[monthSel.value] || [];
   if(!rows.length) return alert("Tidak ada data promo");
@@ -298,6 +393,11 @@ monthSel.addEventListener("change",render);
 document.getElementById("printBtn").onclick=()=>window.print();
 document.getElementById("exportBtn").onclick=exportCSV;
 
+/* ====================
+   INIT
+   ==================== */
+
+buildMonthDropdown();
 render();
 </script>
 
